@@ -1,0 +1,108 @@
+<html>
+    <body style="background: linear-gradient(135deg, #F97794 10%, #623AA2 100%)">
+        <form onsubmit="saveToCloudStorage(event)">
+            <label>Description</label>
+            <input id="discription" type="text" name="discription"  required/>
+            <label> Amount</label>
+            <input id="amt" type="number" name="amount"  required/>
+            <label>Catagory</label>
+            <select id="select" name="selec">
+                <option>Trip</option>
+                <option>Medicine</option>
+                <option>Pet</option>
+                <option>Ration</option>
+            </select>
+
+            <button style="background-color: black;color: blue;"> Submit </button>
+        </form>
+        <ul id='listOfitems'></ul>
+        <script>
+        function saveToCloudStorage(event) {
+            event.preventDefault();
+            const description = event.target.discription.value;
+            const money = event.target.amount.value;
+            const catagory = event.target.selec.value;
+
+        const obj = {
+            description,
+            money,
+            catagory
+        }
+        
+        axios.post("http://localhost:5000/expanse/add-expanse", obj)
+        .then((response) => {
+            showList(response.data);
+            console.log(response.data);
+        }).catch(err => console.log(err))
+        
+       
+   
+}
+
+
+function showList(expanse){
+                
+                parentNode = document.getElementById('listOfitems');
+                const createNewUserHtml = `<li id='${expanse.id}'>${expanse.description} - ${expanse.money} - ${expanse.catagory}
+                                                <button onclick=deleteExp('${expanse.id}')>Delete</button>
+                                            </li>`
+                                               // <button onclick=editExpDetails('${expanse.description}','${expanse.money}','${expanse._id}')>Edit</button>
+                                            //</li>
+                                            //`
+                console.log(createNewUserHtml)
+                parentNode.innerHTML +=  createNewUserHtml;
+                console.log(parentNode.innerHTML)
+            }
+
+window.addEventListener('DOMContentLoaded', async (event) => {
+    try {
+        const response = await axios.get("http://localhost:5000/expanse/get-expanse");
+        for (var i = 0; i < response.data.allExpanse.length; i++) {
+            showList(response.data.allExpanse[i])
+        }
+        console.log(response)
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+/*async function editExpDetails(description, cost, ExpId) {
+    document.getElementById('discription').value = description;
+    document.getElementById('amt').value = cost;
+    // document.getElementById('select').value = catagory;
+    try {
+      
+    axios.put(`http://localhost:5000/expanse/edit-expanse/${ExpId}`)
+     .then((reeponse) => {
+         console.log('editing started');
+         removeItemFromScreen(UserId);
+     })
+    }
+     {catch((err) => {
+         console.log(err);
+     })}
+
+}*/
+
+
+async function deleteExp(ExpId) {
+    try {
+        const response = await axios.delete(`http://localhost:5000/expanse/delete-expanse/${ExpId}`);
+        removeItemFromScreen(ExpId);
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+function removeItemFromScreen(ExpId){
+                const parentNode = document.getElementById('listOfitems');
+                const elem = document.getElementById(ExpId)
+                parentNode.removeChild(elem);
+            }
+        </script>
+
+
+    </body>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.2/axios.min.js"></script>
+</html>
